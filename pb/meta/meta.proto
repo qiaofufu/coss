@@ -1,0 +1,21 @@
+syntax="proto3";
+
+package meta;
+
+option go_package="/meta";
+
+message CreateMetaReq {
+  string Bucket = 1;
+  string Key = 2;
+  uint64  ObjectID = 3;
+}
+
+message CreateMetaResp {
+  uint32  Code = 1;
+  string Msg = 2;
+}
+
+
+service Meta {
+  rpc CreateMeta(CreateMetaReq) returns (CreateMetaResp);
+}

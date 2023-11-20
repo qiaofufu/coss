@@ -1,0 +1,9 @@
+pg:
+  host: 162.14.115.114
+  user: cill
+  passwd: 12345678
+  db_name: test
+  port: 5432
+meta:
+  port: 3000
+log_level: "info"
