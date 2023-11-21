@@ -15,7 +15,28 @@ message CreateMetaResp {
   string Msg = 2;
 }
 
+message ExistReq {
+  string Bucket = 1;
+  string Key = 2;
+}
+
+message ExistResp {
+  bool result = 1;
+}
+
+message GetMetaReq {
+  string Bucket = 1;
+  string Key = 2;
+}
+
+message GetMetaResp {
+  uint64 ObjectID = 1;
+  uint32  Code = 2;
+  string Msg = 3;
+}
 
 service Meta {
   rpc CreateMeta(CreateMetaReq) returns (CreateMetaResp);
+  rpc Exist(ExistReq) returns (ExistResp);
+  rpc GetMeta(GetMetaReq) returns (GetMetaResp);
 }

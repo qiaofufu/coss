@@ -19,16 +19,16 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Data_SaveBlock_FullMethodName      = "/data.Data/SaveBlock"
-	Data_DownloadObject_FullMethodName = "/data.Data/DownloadObject"
+	Data_SaveBlock_FullMethodName     = "/data.Data/SaveBlock"
+	Data_DownloadBlock_FullMethodName = "/data.Data/DownloadBlock"
 )
 
 // DataClient is the client API for Data service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DataClient interface {
-	SaveBlock(ctx context.Context, opts ...grpc.CallOption) (Data_SaveBlockClient, error)
-	DownloadObject(ctx context.Context, in *DownloadObjectReq, opts ...grpc.CallOption) (Data_DownloadObjectClient, error)
+	SaveBlock(ctx context.Context, in *SaveBlockReq, opts ...grpc.CallOption) (*SaveBlockResp, error)
+	DownloadBlock(ctx context.Context, in *DownloadBlockReq, opts ...grpc.CallOption) (*DownloadBlockResp, error)
 }
 
 type dataClient struct {
@@ -39,78 +39,30 @@ func NewDataClient(cc grpc.ClientConnInterface) DataClient {
 	return &dataClient{cc}
 }
 
-func (c *dataClient) SaveBlock(ctx context.Context, opts ...grpc.CallOption) (Data_SaveBlockClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Data_ServiceDesc.Streams[0], Data_SaveBlock_FullMethodName, opts...)
+func (c *dataClient) SaveBlock(ctx context.Context, in *SaveBlockReq, opts ...grpc.CallOption) (*SaveBlockResp, error) {
+	out := new(SaveBlockResp)
+	err := c.cc.Invoke(ctx, Data_SaveBlock_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &dataSaveBlockClient{stream}
-	return x, nil
+	return out, nil
 }
 
-type Data_SaveBlockClient interface {
-	Send(*SaveBlockReq) error
-	CloseAndRecv() (*SaveBlockResp, error)
-	grpc.ClientStream
-}
-
-type dataSaveBlockClient struct {
-	grpc.ClientStream
-}
-
-func (x *dataSaveBlockClient) Send(m *SaveBlockReq) error {
-	return x.ClientStream.SendMsg(m)
-}
-
-func (x *dataSaveBlockClient) CloseAndRecv() (*SaveBlockResp, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(SaveBlockResp)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
-}
-
-func (c *dataClient) DownloadObject(ctx context.Context, in *DownloadObjectReq, opts ...grpc.CallOption) (Data_DownloadObjectClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Data_ServiceDesc.Streams[1], Data_DownloadObject_FullMethodName, opts...)
+func (c *dataClient) DownloadBlock(ctx context.Context, in *DownloadBlockReq, opts ...grpc.CallOption) (*DownloadBlockResp, error) {
+	out := new(DownloadBlockResp)
+	err := c.cc.Invoke(ctx, Data_DownloadBlock_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &dataDownloadObjectClient{stream}
-	if err := x.ClientStream.SendMsg(in); err != nil {
-		return nil, err
-	}
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	return x, nil
-}
-
-type Data_DownloadObjectClient interface {
-	Recv() (*DownloadObjectResp, error)
-	grpc.ClientStream
-}
-
-type dataDownloadObjectClient struct {
-	grpc.ClientStream
-}
-
-func (x *dataDownloadObjectClient) Recv() (*DownloadObjectResp, error) {
-	m := new(DownloadObjectResp)
-	if err := x.ClientStream.RecvMsg(m); err != nil {
-		return nil, err
-	}
-	return m, nil
+	return out, nil
 }
 
 // DataServer is the server API for Data service.
 // All implementations must embed UnimplementedDataServer
 // for forward compatibility
 type DataServer interface {
-	SaveBlock(Data_SaveBlockServer) error
-	DownloadObject(*DownloadObjectReq, Data_DownloadObjectServer) error
+	SaveBlock(context.Context, *SaveBlockReq) (*SaveBlockResp, error)
+	DownloadBlock(context.Context, *DownloadBlockReq) (*DownloadBlockResp, error)
 	mustEmbedUnimplementedDataServer()
 }
 
@@ -118,11 +70,11 @@ type DataServer interface {
 type UnimplementedDataServer struct {
 }
 
-func (UnimplementedDataServer) SaveBlock(Data_SaveBlockServer) error {
-	return status.Errorf(codes.Unimplemented, "method SaveBlock not implemented")
+func (UnimplementedDataServer) SaveBlock(context.Context, *SaveBlockReq) (*SaveBlockResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveBlock not implemented")
 }
-func (UnimplementedDataServer) DownloadObject(*DownloadObjectReq, Data_DownloadObjectServer) error {
-	return status.Errorf(codes.Unimplemented, "method DownloadObject not implemented")
+func (UnimplementedDataServer) DownloadBlock(context.Context, *DownloadBlockReq) (*DownloadBlockResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DownloadBlock not implemented")
 }
 func (UnimplementedDataServer) mustEmbedUnimplementedDataServer() {}
 
@@ -137,51 +89,40 @@ func RegisterDataServer(s grpc.ServiceRegistrar, srv DataServer) {
 	s.RegisterService(&Data_ServiceDesc, srv)
 }
 
-func _Data_SaveBlock_Handler(srv interface{}, stream grpc.ServerStream) error {
-	return srv.(DataServer).SaveBlock(&dataSaveBlockServer{stream})
-}
-
-type Data_SaveBlockServer interface {
-	SendAndClose(*SaveBlockResp) error
-	Recv() (*SaveBlockReq, error)
-	grpc.ServerStream
-}
-
-type dataSaveBlockServer struct {
-	grpc.ServerStream
-}
-
-func (x *dataSaveBlockServer) SendAndClose(m *SaveBlockResp) error {
-	return x.ServerStream.SendMsg(m)
-}
-
-func (x *dataSaveBlockServer) Recv() (*SaveBlockReq, error) {
-	m := new(SaveBlockReq)
-	if err := x.ServerStream.RecvMsg(m); err != nil {
+func _Data_SaveBlock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SaveBlockReq)
+	if err := dec(in); err != nil {
 		return nil, err
 	}
-	return m, nil
-}
-
-func _Data_DownloadObject_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(DownloadObjectReq)
-	if err := stream.RecvMsg(m); err != nil {
-		return err
+	if interceptor == nil {
+		return srv.(DataServer).SaveBlock(ctx, in)
 	}
-	return srv.(DataServer).DownloadObject(m, &dataDownloadObjectServer{stream})
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Data_SaveBlock_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DataServer).SaveBlock(ctx, req.(*SaveBlockReq))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
-type Data_DownloadObjectServer interface {
-	Send(*DownloadObjectResp) error
-	grpc.ServerStream
-}
-
-type dataDownloadObjectServer struct {
-	grpc.ServerStream
-}
-
-func (x *dataDownloadObjectServer) Send(m *DownloadObjectResp) error {
-	return x.ServerStream.SendMsg(m)
+func _Data_DownloadBlock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DownloadBlockReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(DataServer).DownloadBlock(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Data_DownloadBlock_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(DataServer).DownloadBlock(ctx, req.(*DownloadBlockReq))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 // Data_ServiceDesc is the grpc.ServiceDesc for Data service.
@@ -190,18 +131,16 @@ func (x *dataDownloadObjectServer) Send(m *DownloadObjectResp) error {
 var Data_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "data.Data",
 	HandlerType: (*DataServer)(nil),
-	Methods:     []grpc.MethodDesc{},
-	Streams: []grpc.StreamDesc{
+	Methods: []grpc.MethodDesc{
 		{
-			StreamName:    "SaveBlock",
-			Handler:       _Data_SaveBlock_Handler,
-			ClientStreams: true,
+			MethodName: "SaveBlock",
+			Handler:    _Data_SaveBlock_Handler,
 		},
 		{
-			StreamName:    "DownloadObject",
-			Handler:       _Data_DownloadObject_Handler,
-			ServerStreams: true,
+			MethodName: "DownloadBlock",
+			Handler:    _Data_DownloadBlock_Handler,
 		},
 	},
+	Streams:  []grpc.StreamDesc{},
 	Metadata: "pb/data/data.proto",
 }

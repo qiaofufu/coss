@@ -19,3 +19,8 @@ func MustStartGrpc(port string) {
 	meta.RegisterMetaServer(srv, &MetaService{})
 	srv.Serve(lis)
 }
+
+//func (m *MetaService) mustEmbedUnimplementedMetaServer() {
+//	//TODO implement me
+//	panic("implement me")
+//}

@@ -18,13 +18,26 @@ type pg struct {
 	Port   string `mapstructure:"port"`
 }
 
+type access struct {
+	Host string `mapstructure:"host"`
+	Port string `mapstructure:"port"`
+}
+
 type meta struct {
+	Host string `mapstructure:"host"`
+	Port string `mapstructure:"port"`
+}
+
+type data struct {
+	Host string `mapstructure:"host"`
 	Port string `mapstructure:"port"`
 }
 
 type config struct {
 	Pg       pg     `mapstructure:"pg"`
+	Access   access `mapstructure:"access"`
 	Meta     meta   `mapstructure:"meta"`
+	Data     data   `mapstructure:"data"`
 	LogLevel string `mapstructure:"log_level"`
 }
 

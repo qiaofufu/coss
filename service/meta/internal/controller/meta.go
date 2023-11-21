@@ -9,6 +9,7 @@ import (
 type MetaController interface {
 	CreateMeta(bucket, key string, objectID uint64) error
 	Exist(bucket, key string) bool
+	GetMeta(bucket, key string) (*model.Meta, error)
 }
 
 func NewMetaController(db *gorm.DB) MetaController {
@@ -44,4 +45,15 @@ func (m *metaCtrl) Exist(bucket, key string) bool {
 	)
 	tx.Where("bucket = ? AND key = ?", bucket, key).Count(&cnt)
 	return cnt > 0
+}
+
+func (m *metaCtrl) GetMeta(bucket, key string) (*model.Meta, error) {
+	var (
+		meta = new(model.Meta)
+		tx   = m.db.Model(meta)
+		err  error
+	)
+	tx.Where("bucket = ? and key = ?", bucket, key)
+	err = tx.Take(meta).Error
+	return meta, err
 }

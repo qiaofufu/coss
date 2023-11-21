@@ -7,7 +7,7 @@ option go_package="/data";
 message Block {
   string TableName = 1;
   int64 Size = 2;
-  int64 BlockID = 3;
+  uint64 BlockID = 3;
 }
 
 message DataBlocks {
@@ -18,23 +18,26 @@ message SaveBlockReq {
   bytes Data = 1;
 }
 
-
-
 message SaveBlockResp {
-  uint64 ObjectID = 1;
+  Block Block = 1;
+  string Msg = 2;
+  uint32 Code = 3;
 }
 
-message DownloadObjectReq {
-  uint64 ObjectID = 1;
+message DownloadBlockReq {
+  uint64 BucketID = 1;
   int64 Offset = 2;
   int64 Limit = 3;
+  string TableName = 4;
 }
 
-message DownloadObjectResp {
-  bytes data = 1;
+message DownloadBlockResp {
+  bytes Data = 1;
+  string Msg = 2;
+  uint32 Code = 3;
 }
 
 service Data {
-  rpc SaveBlock(stream SaveBlockReq) returns (SaveBlockResp);
-  rpc DownloadObject(DownloadObjectReq) returns (stream DownloadObjectResp);
+  rpc SaveBlock(SaveBlockReq) returns (SaveBlockResp);
+  rpc DownloadBlock(DownloadBlockReq) returns (DownloadBlockResp);
 }
